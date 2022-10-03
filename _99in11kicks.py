@@ -5,7 +5,7 @@ import os
 import discord
 from discord.ext import commands
 #import random
-#import asyncio # used for sleeping
+import asyncio # used for sleeping
 
 from dotenv import load_dotenv
 
@@ -15,6 +15,7 @@ print(f"Token is {TOKEN}")
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.voice_states = True
 #intents.members = True # enable if you are printing IDs of members of a server
 
 bot = commands.Bot(command_prefix = "!", intents = intents)
@@ -67,8 +68,13 @@ async def on_message(message : discord.Message):
 
 	if "k238XpMMn38" in content:
 		print("Kicking user for posting illegal dead bit.")
-		await message.reply(f"Kicked user {sender.nick or sender.name} for posting a dead bit.")
-		await sender.kick(reason="You posted a dead bit. Kill yourself.")
+		if sender.voice:
+			vc = await sender.voice.channel.connect()
+			vc.play(discord.FFmpegPCMAudio(executable="C:/FFMPEG/ffmpeg.exe", source="./resources/audio/AWP_Close.mp3"))
+			await asyncio.sleep(1.5)
+			await vc.disconnect()
+		await message.reply(f"Player {sender.nick or sender.name} left the game [Kicked by console : You have been voted off]")
+		await sender.kick(reason=f"Player {sender.nick or sender.name} left the game [Kicked by console : You have been voted off]")
 
 	await bot.process_commands(message) # always keep this line of code at the bottom of this method so that commands can be processed properly
 
